@@ -1,0 +1,37 @@
+version: '3.4'
+services:
+    keycloak:
+      image: jboss/keycloak:11.0.0
+#      volumes:
+        - ./keycloak-server/realm-export.json:/tmp/keycloak/config/realm-export.json
+      environment:
+          KEYCLOAK_USER: admin
+          KEYCLOAK_PASSWORD: admin
+          KEYCLOAK_IMPORT: /tmp/keycloak/config/realm-export.json
+          DB_VENDOR: POSTGRES
+          DB_ADDR: postgres
+          DB_DATABASE: keycloak
+          DB_USER: keycloak
+          DB_SCHEMA: public
+          DB_PASSWORD: password
+      ports:
+        - 18080:18080
+      command:
+        - "-b"
+        - "0.0.0.0"
+        - "-Djboss.socket.binding.port-offset=10000"
+      restart: on-failure
+      depends_on:
+        - postgres
+    postgres:
+        image: postgres
+        volumes:
+          - postgres_data:/var/lib/postgresql/data
+        environment:
+          POSTGRES_DB: keycloak
+          POSTGRES_USER: keycloak
+          POSTGRES_PASSWORD: password
+volumes:
+    postgres_data:
+      name: keycloak_postgres_data
+      driver: local
