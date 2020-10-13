@@ -44,12 +44,12 @@ services:
       - eureka-server
   keycloak:
     image: jboss/keycloak:11.0.0
-#      volumes:
-#      - ./keycloak-server/realm-export.json:/tmp/keycloak/config/realm-export.json
+      volumes:
+      - ./keycloak-server/realm-export.json:/tmp/keycloak/config/realm-export.json
     environment:
-#        KEYCLOAK_USER: admin
-#        KEYCLOAK_PASSWORD: admin
-#        KEYCLOAK_IMPORT: /tmp/keycloak/config/realm-export.json
+        KEYCLOAK_USER: admin
+        KEYCLOAK_PASSWORD: admin
+        KEYCLOAK_IMPORT: /tmp/keycloak/config/realm-export.json
         DB_VENDOR: POSTGRES
         DB_ADDR: postgres
         DB_DATABASE: keycloak
