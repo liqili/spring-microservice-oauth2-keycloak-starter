@@ -9,11 +9,9 @@ services:
     environment:
       #overriding spring application.properties
       - eureka.client.serviceUrl.defaultZone=http://eureka-server:9091/eureka/
-      - keycloak-client.server-url=http://10.0.0.17:18080/auth
-#      - spring.security.oauth2.client.provider.keycloak.authorization-uri=http://localhost:18080/auth/realms/spring-micro-main/protocol/openid-connect/token
+      - keycloak-client.server-url=http://10.0.0.17:18080/auth # use host name or ip of the host machine
     depends_on:
       - eureka-server
-      - keycloak
   eureka-server:
     build:
       context: ./eureka-server
@@ -29,11 +27,21 @@ services:
     environment:
       #overriding spring application.properties
       - eureka.client.serviceUrl.defaultZone=http://eureka-server:9091/eureka/
-      - keycloak-client.server-url=http://10.0.0.17:18080/auth
-#      - spring.security.oauth2.client.provider.keycloak.authorization-uri=http://localhost:18080/auth/realms/spring-micro-main/protocol/openid-connect/auth
+      - keycloak-client.server-url=http://10.0.0.17:18080/auth # use host name or ip of the host machine
     depends_on:
       - eureka-server
-      - keycloak
+  microservice-producer:
+    build:
+      context: ./microservice-producer
+    ports:
+      - "9081:9081"
+    restart: on-failure
+    environment:
+      #overriding spring application.properties
+      - eureka.client.serviceUrl.defaultZone=http://eureka-server:9091/eureka/
+      - keycloak-client.server-url=http://10.0.0.17:18080/auth # use host name or ip of the host machine
+    depends_on:
+      - eureka-server
   keycloak:
     image: jboss/keycloak:11.0.0
 #      volumes:
@@ -49,7 +57,7 @@ services:
         DB_SCHEMA: public
         DB_PASSWORD: password
     ports:
-      - 18080:18080
+      - "18080:18080"
     command:
       - "-b"
       - "0.0.0.0"
