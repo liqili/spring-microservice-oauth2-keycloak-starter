@@ -44,7 +44,7 @@ services:
       - eureka-server
   keycloak:
     image: jboss/keycloak:11.0.0
-      volumes:
+    volumes:
       - ./keycloak-server/realm-export.json:/tmp/keycloak/config/realm-export.json
     environment:
         KEYCLOAK_USER: admin
