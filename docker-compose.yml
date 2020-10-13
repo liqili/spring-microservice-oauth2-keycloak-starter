@@ -1,36 +1,70 @@
 version: '3.4'
 services:
-    keycloak:
-      image: jboss/keycloak:11.0.0
+  api-gateway:
+    build:
+      context: ./api-gateway
+    ports:
+      - "8080:8080"
+    restart: on-failure
+    environment:
+      #overriding spring application.properties
+      - eureka.client.serviceUrl.defaultZone=http://eureka-server:9091/eureka/
+      - keycloak-client.server-url=http://10.0.0.17:18080/auth
+#      - spring.security.oauth2.client.provider.keycloak.authorization-uri=http://localhost:18080/auth/realms/spring-micro-main/protocol/openid-connect/token
+    depends_on:
+      - eureka-server
+      - keycloak
+  eureka-server:
+    build:
+      context: ./eureka-server
+    ports:
+      - "9091:9091"
+    restart: on-failure
+  microservice-consumer:
+    build:
+      context: ./microservice-consumer
+    ports:
+      - "9080:9080"
+    restart: on-failure
+    environment:
+      #overriding spring application.properties
+      - eureka.client.serviceUrl.defaultZone=http://eureka-server:9091/eureka/
+      - keycloak-client.server-url=http://10.0.0.17:18080/auth
+#      - spring.security.oauth2.client.provider.keycloak.authorization-uri=http://localhost:18080/auth/realms/spring-micro-main/protocol/openid-connect/auth
+    depends_on:
+      - eureka-server
+      - keycloak
+  keycloak:
+    image: jboss/keycloak:11.0.0
 #      volumes:
-        - ./keycloak-server/realm-export.json:/tmp/keycloak/config/realm-export.json
+#      - ./keycloak-server/realm-export.json:/tmp/keycloak/config/realm-export.json
+    environment:
+#        KEYCLOAK_USER: admin
+#        KEYCLOAK_PASSWORD: admin
+#        KEYCLOAK_IMPORT: /tmp/keycloak/config/realm-export.json
+        DB_VENDOR: POSTGRES
+        DB_ADDR: postgres
+        DB_DATABASE: keycloak
+        DB_USER: keycloak
+        DB_SCHEMA: public
+        DB_PASSWORD: password
+    ports:
+      - 18080:18080
+    command:
+      - "-b"
+      - "0.0.0.0"
+      - "-Djboss.socket.binding.port-offset=10000"
+    restart: on-failure
+    depends_on:
+      - postgres
+  postgres:
+      image: postgres
+      volumes:
+        - postgres_data:/var/lib/postgresql/data
       environment:
-          KEYCLOAK_USER: admin
-          KEYCLOAK_PASSWORD: admin
-          KEYCLOAK_IMPORT: /tmp/keycloak/config/realm-export.json
-          DB_VENDOR: POSTGRES
-          DB_ADDR: postgres
-          DB_DATABASE: keycloak
-          DB_USER: keycloak
-          DB_SCHEMA: public
-          DB_PASSWORD: password
-      ports:
-        - 18080:18080
-      command:
-        - "-b"
-        - "0.0.0.0"
-        - "-Djboss.socket.binding.port-offset=10000"
-      restart: on-failure
-      depends_on:
-        - postgres
-    postgres:
-        image: postgres
-        volumes:
-          - postgres_data:/var/lib/postgresql/data
-        environment:
-          POSTGRES_DB: keycloak
-          POSTGRES_USER: keycloak
-          POSTGRES_PASSWORD: password
+        POSTGRES_DB: keycloak
+        POSTGRES_USER: keycloak
+        POSTGRES_PASSWORD: password
 volumes:
     postgres_data:
       name: keycloak_postgres_data
