@@ -1,5 +1,8 @@
 # spring-microservice-oauth2-keycloak-starter
 
+For detailed tutorial, please refer to the post.  
+https://kunkkali.blogspot.com/2020/10/build-j2ee-micro-services-architecture.html
+
 ## docker-compose.yml
 Replace host ip inside with your own, then run the following cmd to start:
 
